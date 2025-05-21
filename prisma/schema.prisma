@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+// model Coin {
+//   id                       String   @id
+//   symbol                   String
+//   name                     String
+//   currentPrice             Float?
+//   marketCap                Float?
+//   marketCapRank            Int?
+//   volume24h                Float?
+//   priceChange24h           Float?
+//   priceChangePercentage24h Float?
+//   lastUpdated              DateTime?
+//   fullData                 Json     // Stores the complete API response
+//   fetchedAt                DateTime @default(now())
+
+//   @@map("coins")
+// }
+
+
+
+// model User {
+//   id        Int    @id @default(autoincrement())
+//   name      String    @unique
+//   firstName String?
+//   lastName  String?
+//   password  String
+//   todos     Todo[]
+// }
+
+// model Todo {
+//      id           Int @id @default(autoincrement())
+//      title        String
+//      done         String
+//      description  String?
+//      userId       Int
+//      user         User  @relation(fields: [userId], references: [id])
+// }
+
+
+// model Trending {
+//   id    Int  @id @default(autoincrement())
+//   name  String
+//   image String
+//   change Float?
+//   createdAt DateTime @default(now())
+// }
+
+// model MarketCap {
+//   id  Int @id @default(autoincrement())
+//   capital Float?
+//   change  Float?
+//   createdAt DateTime @default(now())
+// }
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String?    @unique
+  createdAt DateTime @default(now())
+  transactions Transaction[]
+  cardDetails  CardDetails?
+  invoices     Invoice[]
+}
+
+
+model Transaction {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  amount    Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+}
+
+
+model CardDetails {
+  id           String   @id 
+  cardholder_Id String @unique
+  card_id      String @unique
+  created_at   DateTime @default(now())
+  status      Boolean  @default(false)
+  user         User     @relation(fields: [id], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id        String   @id @default(uuid())
+  billTo    String
+  subtotal  Float
+  total     Float
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+// need to add staus --- deactive as default
