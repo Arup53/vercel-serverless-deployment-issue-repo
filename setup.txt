@@ -1,0 +1,137 @@
+# Create a new directory for your project
+mkdir express-typescript-vercel
+cd express-typescript-vercel
+
+# Initialize the project
+npm init -y
+
+# Install necessary dependencies
+npm install express
+npm install -D typescript @types/node @types/express ts-node vercel @vercel/node
+
+
+-------------- ts-config -------------
+
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "moduleResolution": "node"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
+
+------------- folder stucture -------------
+
+express-typescript-vercel/
+├── src/
+│   └── api/
+│       └── index.ts
+├── tsconfig.json
+├── package.json
+└── vercel.json
+
+
+----------------- index.ts ------------
+
+import express, { Request, Response } from 'express';
+
+// Create Express server
+const app = express();
+
+// Middleware to parse JSON
+app.use(express.json());
+
+// Define routes
+app.get('/api', (req: Request, res: Response) => {
+  res.json({
+    message: 'API is working!',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Example route with parameters
+app.get('/api/hello/:name', (req: Request, res: Response) => {
+  const { name } = req.params;
+  res.json({
+    message: `Hello, ${name}!`,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// POST example
+app.post('/api/echo', (req: Request, res: Response) => {
+  res.json({
+    receivedData: req.body,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
+
+// Export the Express API
+export default app;
+
+
+---------------------- vercel.json ---------------
+
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/api/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "src/api/index.ts"
+    }
+  ]
+}
+
+---------------- package.json -------------
+
+{
+  "name": "express-typescript-vercel",
+  "version": "1.0.0",
+  "description": "Express with TypeScript as a serverless function on Vercel",
+  "main": "dist/api/index.js",
+  "scripts": {
+    "dev": "ts-node src/api/index.ts",
+    "build": "tsc",
+    "start": "node dist/api/index.js",
+    "vercel-build": "tsc"
+  },
+  "keywords": [
+    "express",
+    "typescript",
+    "vercel",
+    "serverless"
+  ],
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^18.15.11",
+    "@vercel/node": "^2.12.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4",
+    "vercel": "^28.20.0"
+  }
+}
